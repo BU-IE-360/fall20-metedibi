@@ -2,5 +2,5 @@
 
 ##Week 1
 
-[Here](Files/interesting_examples.html)  is the link to Homework 0.
+[Here](file:///Users/metedibi/Desktop/Dersler/IE360/view.php.html)  is the link to Homework 0.
 yes.
