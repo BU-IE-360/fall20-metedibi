@@ -1,5 +1,1 @@
-#Mete Dibi Progress Journal
-
-##Week 1
-
-[Here] is the link to Homework 0.
+[Here](Files/homework0.html)  is the link to Homework 0.
