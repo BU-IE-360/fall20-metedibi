@@ -429,23 +429,33 @@ summary {
 </div>
 
 
-<p>0 <a href="https://blogs.oracle.com/datascience/introduction-to-forecasting-with-arima-in-r">Time series forecasting using ARIMA models</a></p>
-<pre><code>This example is important because it introduces the forecasting methodology using ARIMA models in R. The steps are ...</code></pre>
-<p>1.http://www.iei1946.it/upload/rivista_articoli/allegati/248_klazogloudritsakisricfinalx.pdf</p>
-<p>Healthcare:</p>
-<p>Today in the US approximately 30% of the population are uninsured or under-insured, while in other countries, in which there are National Health Systems, the percentage of uninsured people ranges from 1% to 2% of the population. Today, more than 1000 insurance companies operate and multiple health programs are offered to American citizens. The amount of cover, premium and employee participation therein is negotiated between employers and employees. The lack of a national social security institution and the rapid increase in health expenditure, with continued widening of social inequalities, have led to the pursuit of policies to maintain low costs of health services.</p>
-<p>The continuous rise in health expenditure exerts pressure on government budgets, health services and personal patient finance. This has led policy makers to implement reforms in order to mitigate pressures on these costs, as well as introduce programs and forecasting models to provide a support tool capable of adapting to issues that may arise. The purpose of this study is to investigate the best model to predict total health spending in the USA, a country with the highest global spending, using the Box-Jenkins methodology.</p>
-<p>The data analyzed in this study derives from the Historical Statistics database of the United States covering the period from 1900 to 2017</p>
-<p>The main objective of this study is to find the most appropriate model for projecting health spending in the US. The results showed that US health spending could be better constructed and predicted using the ARIMA (2,1,0) model.</p>
-<p>2.Web traffic</p>
-<p>This specific topic focuses on predicting the views for different Wiki pages. The original dataset has 145k time series data on the number of views of different Wiki pages.</p>
-<p>In recent years, more emphasis on how to predict traffic of web pages has increased significantly and prompted the need for exploring various methods on how to effectively forecast future values of multiple times series.</p>
-<p>Predicting web traffic can help web site owners in many ways including: (a) determining an effective strategy for load balancing of web pages residing in the cloud, (b) forecasting future trends based on historical data and (c) understanding the user behavior.</p>
-<p>3.the daily closing price of company stock finance</p>
-<p>4.https://www.researchgate.net/publication/328633706_Forecasting_of_demand_using_ARIMA_model supply chain</p>
-<p>5.https://www.researchsquare.com/article/rs-39149/v1 covid A study was carried out on Coronavirous to observe the number of cases, deaths and recovery cases worldwide within a specific time period of five months. Based on this data, this research paper will predict the future spread of this infectious disease in human society.</p>
+<p>0.<a href="https://blogs.oracle.com/datascience/introduction-to-forecasting-with-arima-in-r">Time series forecasting using ARIMA models</a></p>
+<p>This example is important because it introduces the forecasting methodology using ARIMA models in R. The steps are …</p>
+<p>-Examine your data</p>
+<p>-Decompose your data</p>
+<p>-Stationarity</p>
+<p>-Autocorrelations and choosing model order</p>
+<p>-Fit an ARIMA model</p>
+<p>-Evaluate and iterate</p>
+<p>1.<a href="http://www.iei1946.it/upload/rivista_articoli/allegati/248_klazogloudritsakisricfinalx.pdf">Spending on Healthcare Operations in USA</a></p>
+<p>According to the World Health Organization (WHO), the US is ranked first in the world for the highest total health expenditure in GDP and per capita spending. This is because the government does not offer health insurance coverage or national health services.The insurances packages are offered by and the hospitals are operated by private entities. So the cost of enjoying healthcare packages are enormously high.</p>
+<p>This have led to the pursuit of policies by the government to maintain low costs of health services. The purpose of the study is to investigate the best model to forecast ad model total health spending in the USA, a country with the highest global spending on healthcare, using the Box-Jenkins (ARIMA) methodology.</p>
+<p>The health care spending data is taken from the database of the Historical Statistics institution and it covers the period from 1900-2017.</p>
+<p>The results showed that US health spending could be better constructed and predicted using the ARIMA (2,1,0) model.</p>
+<p>2.<a href="https://ieeexplore.ieee.org/abstract/document/8622207">Web Traffic via Analyzing Wikipedia Visits</a></p>
+<p>In an internet driven world, it is vital for any company to monitor and analyze visits from customers to their web platforms. With an efficient forecasting method of web traffic, new strategies could be implemented and competitive advantage can be achieved. It is also crucial in terms of understanding user behaviour and expectations. The study above is an example of web traffic forecasting.</p>
+<p>The dataset used is Google’s Web Traffic Time Series Forecasting, consisting of approximately 145,000 Wikipedia articles. Each of the time series represent a number of daily views of a different Wikipedia article, starting from July 1st, 2015 up until September 11th, 2017.</p>
+<p>3.<a href="https://www.researchgate.net/publication/328633706_Forecasting_of_demand_using_ARIMA_model">Supply Chain Management</a></p>
+<p>Demand forecasting is a concept that is quite important for inventory management. It is so important that, a mistake in demand predictions will result in significant costs for the company. For instance, a stock out is a situation that is definitely never desired. Also the concept of intermittent demands, roughly meaning the demand is never stable, is hard to cope with by using traditional methods, so a mathematical model is needed.</p>
+<p>The study above focuses on forecasting the demand in a food company.The data used is the demand data from January 10 until December 2015.</p>
+<p>The results obtained proveD that the ARIMA (1,0,1) model could be utilized to model and forecast the future demand in this company.</p>
+<p>4.<a href="https://www.researchsquare.com/article/rs-39149/v1">Future Spread of Covid-19</a></p>
+<p>A study was carried out on Coronavirus to observe the number of cases, deaths and recovery cases worldwide within a specific time period of five months. Based on this data, this research paper will predict the future spread of this infectious disease in human society.</p>
 <p>In this article, we implemented several forecasting techniques: naive method, simple average, moving average, single exponential smoothing, Holt linear trend method, Holt Winter method and ARIMA, for comparison, and how these methods improve the Root mean square error score.</p>
 <p>By continuing the model, future predictions of death cases indicate that the number of deaths will increased by more than 600,000 by January 2020.</p>
+<p>5.<a href="https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0209922&amp;type=printable">Stock Prices</a></p>
+<p>Forecasting stock prices is of quite importance, since many stock price data are non-linear and non-stationary, which makes it challenging for many investors in financial markets. Most forecasting models propose only one variable, that is, previous days stock price. However, there are actually many influential factors such as political environment, investors psychology, technical analysis and so on. Selecting the key variables from many of these indicators is vital for an accurate forecast. The study above is based on previous studies, but offers some changes in the forecasting method.</p>
+<p>The data used in the study is the daily stock price data of 5 companies (CHT, China Steel, Hon Hai,Cathay Financial Holdings, TSMC) for an 11 year period (2.01.2003-31.12-2013).</p>
 
 
 
