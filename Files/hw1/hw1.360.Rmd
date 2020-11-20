@@ -38,6 +38,8 @@ Importing data for all 3 measures:
 ```{r}
 library(ggplot2)
 library(dplyr)
+setwd('/Users/metedibi/Documents/GitHub/fall20-metedibi/Files/hw1')
+
 
 
 tourists<-read.csv(file = "tourists.csv", header = TRUE, colClasses = c("NULL", "integer")) 
@@ -239,3 +241,5 @@ Percentage changes in currency rates and Google searches have been strongly corr
 There is a 3rd graph above; ie. the original currency rate graph as we know it. Although the correlation between the percentage changes in currency rates and our keyword "dolar" has been exhibiting similar patterns until 2019, we need an explanation for the small difference in year 2019. Probably because the sharp rise in the rates in 2018 have affected people in a very strong way and caused a permanent shift in the popularity of the keyword, so although the percentage changes in currency rates have been stable in 2019, Googgle searches increased slightly due to this impact?
 
 
+
+##### [Here](hw1.360.Rmd) is my rmd file.
