@@ -1,0 +1,241 @@
+---
+title: "IE360-HW1"
+output: html_document
+---
+
+
+
+
+In this study, I aim to analyze the correlation between 3 measures and 3 keywords from Google Trends:
+
+#### MEASURES 
+1. Number of foreign tourists that visit Antalya (Monthly)
+2. Domestic House Sales (Monthly)
+3. Rate of Change of Dollar/TL Rate (Weekly)
+
+Note: All data is taken from TCMB. For more info, visit the [website](https://evds2.tcmb.gov.tr/index.php?*) 
+
+#### KEYWORDS
+1. "Анталия" (Antalya in Cyrillic Alphabet), Domain: Russia
+2. "Satılık", Domain: Turkey, Sub-Category: Real Estate
+3. "Dolar",  Domain: Turkey
+
+
+
+*Note: For each measure, a small explanation will be given below histograms, and a large explanation will be given below boxplots.*
+
+
+
+.
+.
+.
+
+
+
+
+
+Importing data for all 3 measures:
+```{r}
+library(ggplot2)
+library(dplyr)
+
+
+tourists<-read.csv(file = "tourists.csv", header = TRUE, colClasses = c("NULL", "integer")) 
+houses<-read.csv(file = "houses.csv", header = TRUE, colClasses = c("NULL", "integer"))
+rates<-read.csv(file = "rates.csv", header = TRUE, colClasses = c("NULL", "numeric")) 
+
+
+
+```
+
+
+
+There is a small adjustment to make here: When we're working with currency rate data, we should keep in mind that the popularity of the term is correlated with fluctuations more than it is correlated with the level, ie. a sharp rise or fall of the rate will stimulate people the search for what is going on. So the absolute value of the rate of change of the currency rate will be a good indicator that affects the popularity of the term
+
+```{r}
+rates.change<-c(0)
+for (i in 2:261) {
+ rates.change[i] = abs((rates$Rate[i] - rates$Rate[i - 1]) / rates$Rate[i-1])
+}
+```
+
+
+
+Importing google trends data for all 3 measures:
+```{r}
+tourists.trends<-read.csv(file = "tourists.trends.csv", header = TRUE, colClasses = c("NULL", "integer"))  
+rates.trends<-read.csv(file = "rates.trends.csv", header = TRUE, colClasses = c("NULL", "integer")) 
+houses.trends<-read.csv(file = "houses.trends.csv", header = TRUE, colClasses = c("NULL", "integer")) 
+```
+
+
+
+Creating time arrays:
+```{r}
+dates.month = seq(as.Date("01-01-2015",  format = "%d-%m-%Y"), length.out = 60, by = "month")
+dates.week<-seq (as.Date("01-01-2015",  format = "%d-%m-%Y"), length.out = 261, by = "week")
+years.month<-c(rep("2015", 12), rep("2016", 12),rep("2017", 12),rep("2018", 12),rep("2019", 12))
+years.week<-c(rep("2015", 53), rep("2016", 52),rep("2017", 52),rep("2018", 52),rep("2019", 52))
+```
+
+
+
+Creating data frames for the measure and its trend. Notice how we use dates.month or dates.week to signify the type of data(monthly vs weekly). Also classifying each data with respect to its year via years.week and years.month
+```{r}
+df.tourists<-data_frame(tourists$Visitors, dates.month, years.month) 
+df.tourists.trends<-data_frame(tourists.trends$Keyword.Search, dates.week, years.week)
+
+df.rates<-data_frame(rates.change, dates.week, years.week) 
+df.rates.trends<-data_frame(rates.trends$Keyword.Search, dates.week, years.week)
+
+df.houses<-data_frame(houses$Houses.Sold, dates.month, years.month)
+df.houses.trends<-data_frame(houses.trends$Keyword.Search, dates.week, years.week)
+
+```
+
+
+
+
+
+Now that we're all set, we may start graphing. 
+First measure, number of foreign touristic visits to Antalya per month: Histograms per year
+```{r}
+ggplot(df.tourists %>% slice(1:12),aes(tourists$Visitors[1:12])) +geom_histogram(binwidth = 250000, breaks = seq(0, max(tourists$Visitors), 50000)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Antalya Touristic Visits 2015") + xlab("Number of Tourists") + geom_vline(aes(xintercept = mean(tourists$Visitors[1:12])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.tourists %>% slice(13:24),aes(tourists$Visitors[13:24])) +geom_histogram(binwidth = 250000, breaks = seq(0, max(tourists$Visitors), 50000)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Antalya Touristic Visits 2016") + xlab("Number of Tourists") + geom_vline(aes(xintercept = mean(tourists$Visitors[13:24])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.tourists %>% slice(25:36),aes(tourists$Visitors[25:36])) +geom_histogram(binwidth = 250000, breaks = seq(0, max(tourists$Visitors), 50000)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Antalya Touristic Visits 2017") + xlab("Number of Tourists")+ geom_vline(aes(xintercept = mean(tourists$Visitors[25:36])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.tourists %>% slice(37:48),aes(tourists$Visitors[37:48])) +geom_histogram(binwidth = 250000, breaks = seq(0, max(tourists$Visitors), 50000)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Antalya Touristic Visits 2018") + xlab("Number of Tourists")+ geom_vline(aes(xintercept = mean(tourists$Visitors[37:48])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.tourists %>% slice(49:60),aes(tourists$Visitors[49:60])) +geom_histogram(binwidth = 250000, breaks = seq(0, max(tourists$Visitors), 50000)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Antalya Touristic Visits 2019") + xlab("Number of Tourists") + geom_vline(aes(xintercept = mean(tourists$Visitors[49:60])),col='red',size=1, alpha = 0.5)
+```
+
+
+
+Except for 2016, the number of foreign visits to Antalya has been rising steadily since 2015.
+
+
+
+
+
+
+
+
+Boxplots for 5 years for both our measure and our keyword:
+```{r}
+
+ggplot(df.tourists,aes(dates.month, tourists$Visitors)) + geom_boxplot(aes(fill = years.month)) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Tourists") +
+  xlab("Time") + ylab("Number of Tourists") + labs(fill = "Years") + geom_line(alpha = 0.3)
+
+ggplot(df.tourists.trends,aes(dates.week, tourists.trends$Keyword.Search)) + geom_boxplot(aes(fill = years.week)) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1))  + ggtitle("Keyword 'Анталия', Domain: Russia") +
+  xlab("Time") + ylab("Popularity") + labs(fill = "Years") + geom_line(alpha = 0.3)
+ 
+```
+
+The key insight would be to say that there is a really strong relationship between our measure and our keyword, and this is because the major portion of touristic visits to Antalya comes from Russia. Russians google the word Antalya and plan their vacation/potential vacation, for hotel booking, flight tickets, travel guides or tours etc. Naturally, both our measure and keyword tend to rise in summer, which is the holiday season for the city.  
+
+
+An interesting thing here is the sharp fall in 2016 in both graphs, due to the diplomatic crisis between Turkey and Russia which led many Russians to boycott Turkey and choose a different destination for holiday. After the crisis, notice how there is a gradual increase in numbers, most likely correlated with the devaluation of the Turkish Lira, encouraging touristic visits from foreign countries, one of which is Russia.
+
+
+Notice how the boxplots are very large due to variation, because tourist visits are never stable and rise & fall sharply in different seasons.
+
+
+
+
+
+
+
+Second measure, domestic house sales per month: Histograms per year
+```{r}
+ggplot(df.houses %>% slice(1:12),aes(houses$Houses.Sold[1:12])) + geom_histogram(binwidth = 1000, breaks = seq(0, max(houses$Houses.Sold), 2500)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold in 2015") + xlab("Number of Houses Sold") + geom_vline(aes(xintercept = mean(houses$Houses.Sold[1:12])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.houses %>% slice(13:24),aes(houses$Houses.Sold[13:24])) +geom_histogram(binwidth = 1000, breaks = seq(0, max(houses$Houses.Sold), 2500)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold in 2016") + xlab("Number of Houses Sold")  + geom_vline(aes(xintercept = mean(houses$Houses.Sold[13:24])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.houses %>% slice(25:36),aes(houses$Houses.Sold[25:36])) +geom_histogram(binwidth = 1000, breaks = seq(0, max(houses$Houses.Sold), 2500)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold in 2017") + xlab("Number of Houses Sold") + geom_vline(aes(xintercept = mean(houses$Houses.Sold[25:36])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.houses %>% slice(37:48),aes(houses$Houses.Sold[37:48])) +geom_histogram(binwidth = 1000, breaks = seq(0, max(houses$Houses.Sold), 2500)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold in 2018") + xlab("Number of Houses Sold") + geom_vline(aes(xintercept = mean(houses$Houses.Sold[37:48])),col='red',size=1, alpha = 0.5)
+
+ggplot(df.houses %>% slice(49:60),aes(houses$Houses.Sold[49:60])) +geom_histogram(binwidth = 1000, breaks = seq(0, max(houses$Houses.Sold), 2500)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold in 2019") + xlab("Number of Houses Sold") + geom_vline(aes(xintercept = mean(houses$Houses.Sold[49:60])),col='red',size=1, alpha = 0.5)
+```
+
+Sales have been fluctuating around 110000 and do not follow a specific trend.
+
+
+
+
+
+
+
+Boxplots for 5 years for both our measure and our keyword:
+```{r}
+
+ggplot(df.houses,aes(dates.month, houses$Houses.Sold)) + geom_boxplot(aes(fill = years.month)) + geom_line(alpha = 0.3) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Houses Sold") +
+  xlab("Time") + ylab("Houses Sold") + labs(fill = "Years")
+
+ggplot(df.houses.trends,aes(dates.week, houses.trends$Keyword.Search)) + geom_boxplot(aes(fill = years.week)) + geom_jitter(alpha = 0.3) + geom_line(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Keyword 'Satılık', Domain: Turkey") +
+  xlab("Time") + ylab("Popularity") + labs(fill = "Years")
+
+```
+
+There are some months in which house sales drop drastically; this is probably due to some small-sized recessions, rate fluctuations and higher interest rates on bank loans, which discourage people to buy houses. Notice how the large recession due to the "Pastor Bronson" crisis between Turkey and USA have caused house sales to plummet, an economic crisis starting from summer 2018 and lasting nearly a year. 
+
+We may say that both trends tend to follow a similar pattern, especially after 2016. Although many websites for real estate sales have been present since many years, our relationship indicates that people still tend to search "satılık ev", "satılık daire", "satılık 2+1" etc via Google, and they probably continue with the above mentioned websites that are listed on Google. 
+
+Like mentioned above, the correlation between our measure and keyword is more significant after 2016 and less significant in 2015, ie. they don't quite match. Rather than visiting a real estate agency and making physical tours all day long for the best offer, many potential buyers (as well as sellers!) have been searching the web for several years; maybe 2015-2016 was a year in which real estates websites have rocketed or advertised frequently, causing buyers/sellers to switch platforms.  
+
+Notice how the boxplots have a really higher variation than previous years in 2018 and 2019 This is because the market was unstable due to economic recession mentioned above.
+
+
+
+
+
+
+
+Third measure, weekly change of rate in the Dollar/TL parameter: Histograms per year
+```{r}
+ggplot(df.rates %>% slice(1:53),aes(df.rates$rates.change[1:53])) +geom_histogram(breaks = seq(0, max(rates.change), 0.002)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate of Change in Dollar/TL Rate, 2015") + xlab("Rate of Change") + geom_vline(aes(xintercept = mean(df.rates$rates.change[1:53])),col='red',size=1, alpha = 0.5) 
+
+ggplot(df.rates %>% slice(54:105),aes(df.rates$rates.change[54:105])) +geom_histogram(breaks = seq(0, max(rates.change), 0.002)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate of Change in Dollar/TL Rate, 2016") + xlab("Rate of Change") + geom_vline(aes(xintercept = mean(df.rates$rates.change[54:105])), col='red',size=1, alpha = 0.5)
+ggplot(df.rates %>% slice(106:157), aes(df.rates$rates.change[106:157])) +geom_histogram(breaks = seq(0, max(rates.change), 0.002)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate of Change in Dollar/TL Rate, 2017") + xlab("Rate of Change") + geom_vline(aes(xintercept = mean(df.rates$rates.change[106:157])),col='red',size=1, alpha = 0.5) 
+
+ggplot(df.rates %>% slice(158:209),aes(df.rates$rates.change[158:209])) +geom_histogram(bins = 52, binwidth = 0.002) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate of Change in Dollar/TL Rate, 2018") + xlab("Rate of Change") + geom_vline(aes(xintercept = mean(df.rates$rates.change[158:209])),col='red',size=1, alpha = 0.5) 
+
+ggplot(df.rates %>% slice(210:261),aes(df.rates$rates.change[210:261])) +geom_histogram(breaks = seq(0, max(rates.change), 0.002)) + theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate of Change in Dollar/TL Rate, 2019") + xlab("Rate of Change") + geom_vline(aes(xintercept = mean(df.rates$rates.change[210:261])),col='red',size=1, alpha = 0.5) 
+
+
+```
+
+
+Rate of change have mainly fluctuated around 0.01, with a sharp rise and variation of data in 2018 due to the mentioned "Pastor Bronson" diplomatic crisis and the economic recession. 
+
+
+
+
+
+
+
+
+Boxplots for 5 years for both our measure and our keyword:
+```{r}
+
+
+ggplot(df.rates,aes(dates.week, rates.change)) + geom_boxplot(aes(fill = years.week)) + geom_line(alpha = 0.3) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate Change") +
+  xlab("Time") + ylab("Change in the Currency Rate") + labs(fill = "Years")
+
+
+ggplot(df.rates.trends,aes(dates.week, rates.trends$Keyword.Search)) + geom_boxplot(aes(fill = years.week)) + geom_line(alpha = 0.3) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Keyword: 'Dolar', Domain: Turkey") +
+  xlab("Time") + ylab("Popularity") + labs(fill = "Years")
+
+ggplot(df.rates,aes(dates.week, rates$Rate)) + geom_boxplot(aes(fill = years.week)) + geom_line(alpha = 0.3) + geom_jitter(alpha = 0.3) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + ggtitle("Rate") +
+  xlab("Time") + ylab("Currency Rate") + labs(fill = "Years")
+```
+
+
+
+Percentage changes in currency rates and Google searches have been strongly correlated and followed a similar pattern throughout years. The 2018 crisis can also be observed on the graph. Like mentioned in the beginning, quick fluctuations cause people to search Google to find out what is going on.
+
+There is a 3rd graph above; ie. the original currency rate graph as we know it. Although the correlation between the percentage changes in currency rates and our keyword "dolar" has been exhibiting similar patterns until 2019, we need an explanation for the small difference in year 2019. Probably because the sharp rise in the rates in 2018 have affected people in a very strong way and caused a permanent shift in the popularity of the keyword, so although the percentage changes in currency rates have been stable in 2019, Googgle searches increased slightly due to this impact?
+
+
