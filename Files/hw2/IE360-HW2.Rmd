@@ -1,8 +1,13 @@
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
 ```
 
+
+---
 title: "Correlation Study on Exchange Rates, Interest Rates and National USD Reserves"
 author: "Mete Dibi - IE360 - Fall 2020"
 output: 
@@ -11,7 +16,7 @@ output:
     toc_depth: 4
     toc_float: true
     theme: sandstone
-
+---
 
 ### AIM OF STUDY
 Severe rises in the USD-TRY exchange rate have long been part of the lives of Turkish citizens. Historically, many governments have pursued strategies that do not aim to intervene during times of inflation-resulting in higher exchange rates. Some may argue, that these policies have led an increase in the amount of exports due to lower prices for foreign countries. However, since Turkey is a country which imports greatly more than it exports, even the smallest fluctuations in the exchange rate can have some effects on the prices of imported goods. Therefore, the Central Bank of Republic of Turkey(CBRT) is entitled to intervene during such times of recession and inflation.
@@ -46,11 +51,11 @@ library(GGally)
 library(RColorBrewer)
 library(ggjoy)
 library(wesanderson)
+library(ggpubr)
 
 
 
-
-setwd('/Users/metedibi/Documents/GitHub/fall20-metedibi/Files/hw1')
+setwd('/Users/metedibi/Documents/GitHub/fall20-metedibi/Files/hw2')
 rates<-read.csv(file = "rates.csv", header = TRUE)
 reserves<-read.csv(file = "cbreserve.csv", header = TRUE)
 interestdata<-read.csv(file = "interest.csv", header = TRUE)
@@ -80,6 +85,11 @@ We will now look at yearly density plots of all measures.
 ```{r}
 ggplot(dataset,aes(x = exchangerate, y = years, fill = years)) + geom_joy(aes(alpha = 1), scale=3, rel_min_height=0.01) + theme_joy() + scale_fill_manual(values = c(wes_palette("Rushmore1", n= 4), wes_palette("Royal1", n= 3))) +  ylab("Years") + xlab("USD-TRY Rate")
 ```
+
+
+
+
+
 The exchange rate have been exhibiting patterns similar to a normal distributed random variable between years 2013-2017, with a non stationary mean, which is clearly rising up, and somewhat a stationary variance. The year 2018 shows a greater variance, without a specific distribution, indicating severe fluctuations (which we will analyze in the upcoming sections)and we see a pattern similar to 2013-2017 in year 2019.
 
 
@@ -91,7 +101,12 @@ The exchange rate have been exhibiting patterns similar to a normal distributed 
 ```{r}
 ggplot(dataset,aes(x = interestrate, y = years, fill = years)) + geom_joy(aes(alpha = 1), scale=2, rel_min_height=0.01) + theme_joy() + scale_fill_manual(values = c(wes_palette("Rushmore1", n= 4), wes_palette("Royal1", n= 3))) + ylab("Years") + xlab("Interest Rate on TRY Accounts") 
 ```
-  The interest rates exhibit a nearly perfect normal distribution pattern, also very similar to the exchange rate density plots in terms of the general trend, between 2013-2017. The non-stationarity for the mean holds: it has been rising slowly, but steadily, with a big jump in 2018. The variances seem to be stationary between 2013-2017. Another interesting finding is the density plot of 2019-although it's mean is still elevated in comparison to 2018, it does not match the density plot of the exchange rate in this year, meaning a different strategy was probably pursued by the central bank.
+  
+  
+  
+  
+  
+The interest rates exhibit a nearly perfect normal distribution pattern, also very similar to the exchange rate density plots in terms of the general trend, between 2013-2017. The non-stationarity for the mean holds: it has been rising slowly, but steadily, with a big jump in 2018. The variances seem to be stationary between 2013-2017. Another interesting finding is the density plot of 2019-although it's mean is still elevated in comparison to 2018, it does not match the density plot of the exchange rate in this year, meaning a different strategy was probably pursued by the central bank.
 
 
 
@@ -101,6 +116,11 @@ ggplot(dataset,aes(x = interestrate, y = years, fill = years)) + geom_joy(aes(al
 ```{r}
 ggplot(dataset,aes(x = cbreserves, y = years, fill = years)) + geom_joy(aes(alpha = 1), scale=2, rel_min_height=0.01) + theme_joy() + scale_fill_manual(values = c(wes_palette("Rushmore1", n= 4), wes_palette("Royal1", n= 3))) + ylab("Years") + xlab("USD Reserves of CBRT (in Million Dollars)") 
 ```
+
+
+
+
+
 Not surprisingly, the USD reserves of CBRT have been decreasing gradually, with a severe decrease in 2018. Notice how the density plots exhibit a reverse pattern with exchange rates, that is, they seem negatively correlated in the first look. The year 2018, again, was a year of great fluctuations with a high variance. In other years, variances seem stationary. 
 
 The density plots can be fitted into a normal distribution, but they seem less suitable for this, in contrast to interest rates. Also notice how the year 2019 is nearly perfect in terms of normal distribution pattern, in contrast to the density plot of the interest rates in 2019 which was not normally distributed: The central bank, in contrast to previous years, perhaps choose selling reserves when needed over an interest rate alteration policy, resulting in a similar density plot with exchange rates.
@@ -131,6 +151,11 @@ ggplot(dataset,aes(dates, cbreserves)) +  geom_line() + scale_x_date(date_labels
 
 
 ```
+
+
+
+
+
 The line plot affirms our findings in the previous section: All three measures seem to show correlated patterns in 2013-2018, with increasing means for exchange and interest ratio and a decreasing mean for national usd reserves, with the exception of year 2019 in which exchange ratio does not show a correlated pattern with interest rate.
 
 
@@ -146,6 +171,16 @@ The line plot affirms our findings in the previous section: All three measures s
 We will now focus on 6 different historical occasions in which the exchange rates went up, and the central bank intervened. We will analyze how and when the central bank intervenes in times of rising exchange rates. 
 
 PS: The specific events which caused these severe fluctuations on the exchange rate will not be elaborated, since it is not aim of this study.
+
+
+
+
+
+
+
+
+
+
 ##### CASE 1
 ```{r}
 
@@ -165,11 +200,21 @@ geom_line(data = dataset[50:83,], aes(x = dates, y = cbreserves), colour = "blue
  
 
 ```
+
+
+
+
+
 USD-TRY Rate:We observe a severe rise in exchange rate, and a gradual stabilization period afterwards. with the most severe rise starting around January 2014. The peak point is achieved in February 2014.
 
 Interest Rate on TRY Accounts: When the exchange rate first started to rise in January 2014, the interest rates were also increased (although with a 2-3 weeks latency). During peak point, interest rates were still increasing, and continued to increase for another 2-3 weeks, perhaps contributing to the drop in exchange rates in the following months.
 
 USD Reserves of CBRT: Central bank sold nearly %10 of their reserves when exchange rate started to rise in January 2014, and stopped selling when the peak point was reached. In contrast to interest rates, we see less latency when it comes to intervention via selling reserves, possibly indicating a stronger correlation.
+
+
+
+
+
 
 
 
@@ -190,6 +235,10 @@ geom_line(data = dataset[84:190,], aes(x = dates, y = cbreserves), colour = "blu
  
 ```
 
+
+
+
+
 USD-TRY Rate: A small rising started in August 2014, continuing with an increased momentum after February 2015. The peak point is reached around October Although not stabilized completely, it seems to stop rising after November 2015(except small fluctuations.)
 
 Interest Rate on TRY Accounts: Similarly, starting in August 2014, interest rates have been rising gradually as a response to rising exchange rates in all periods, in contrast to previous year in which interest rates were increased only when the exchange rate gained maximum momentum, so this time there is no latency.
@@ -197,6 +246,10 @@ Interest Rate on TRY Accounts: Similarly, starting in August 2014, interest rate
 USD Reserves of CBRT: Similarly, between August 2014 and August 2016, some of the USD reserves were sold in certain periods, coinciding with the most severe rises in exchange rates.
 
 Notice how in In August 2016, central bank have altered their strategy: interest rates were gradually lowered, and some USD reserves were replenished. However, this did not lead to higher exchange rates; as mentioned, there are many other factors contributing to exchange rates, perhaps political stability were established in this period, tackling the general rising trend in exchange rates. 
+
+
+
+
 
 
 
@@ -217,6 +270,10 @@ geom_line(data = dataset[196:246,], aes(x = dates, y = cbreserves), colour = "bl
 
 ```
 
+
+
+
+
 USD-TRY Rate: In comparison to previous case, this period exhibits a sharp pattern, that is, the rise in the exchange rate are severe.
 It started around November 2016, reaching peak point at February 2017
 
@@ -225,6 +282,8 @@ Interest Rate on TRY Accounts: When the rise in exchange rate first started, the
 USD Reserves of CBRT: When the rise first started, the central bank have replenished reserves, instead of selling them, which most probably contributed to the rise of the exchange rates for another 1-2 months. But after that, reserves were sold, and the increase was tackled in the following months.
 
 Note how the central bank pursued a reserve selling policy before an increasing interest rate policy.
+
+
 
 
 
@@ -245,6 +304,10 @@ ggplot(dataset,aes(dates, cbreserves)) +  geom_line() + scale_x_date(date_labels
 geom_line(data = dataset[246:273,], aes(x = dates, y = cbreserves), colour = "blue", size = 1) + xlab("Time") + ylab("USD Reserves of Central Bank of Turkey (in Million Dollars)")
  
 ```
+
+
+
+
 
 USD-TRY Rate: Again, a sharp rise. 
 
@@ -274,6 +337,10 @@ ggplot(dataset,aes(dates, cbreserves)) +  geom_line() + scale_x_date(date_labels
 geom_line(data = dataset[273:320,], aes(x = dates, y = cbreserves), colour = "blue", size = 1) + xlab("Time") + ylab("USD Reserves of Central Bank of Turkey (in Million Dollars)")
  
 ```
+
+
+
+
 
 USD-TRY Rate: Most severe rise in the time interval of our study, with 2 jumps (May 2018 and August 2018)
 
@@ -307,6 +374,10 @@ geom_line(data = dataset[320:365,], aes(x = dates, y = cbreserves), colour = "bl
  
 ```
 
+
+
+
+
 USD-TRY Rate: A sharp rise starting around February 2019, and a somehow unstable period even after the exchange rate was tackled around July-August 2019.
 
 Interest Rate on TRY Accounts: The first response to the rise was increased interest rates until July 2019, which most likely greatly contributed to the fall of exchange rates in that period. However, even though the exchange rate remained greatly unstable in the following months, the interest rate were severely dropped.
@@ -332,17 +403,22 @@ Note 2: Red line: Exchange Rate, Green Line: Interest Rate, Blue Line: USD Reser
 ```{r}
 
 
-ggplot(dataset,aes(x = dates.week)) +  geom_line(aes(y = exchangerate * 3.8, colour="USD-TRY Rate"), col = "red") + geom_line(aes(y = interestrate, colour="Interest Rate on TRY Accounts"), col ="green") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) +  xlab("Time") + ylab("USD-TRY Rate vs Interest Rate on TRY Accounts")
+ggplot(dataset,aes(x = dates)) +  geom_line(aes(y = exchangerate * 3.8, colour="USD-TRY Rate"), col = "red") + geom_line(aes(y = interestrate, colour="Interest Rate on TRY Accounts"), col ="green") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) +  xlab("Time") + ylab("USD-TRY Rate vs Interest Rate on TRY Accounts")
 
 
-ggplot(dataset,aes(x = dates.week)) +  geom_line(aes(y = exchangerate * 3.8, colour="USD-TRY Rate"), col = "red") + geom_line(aes(y = cbreserves / 5000, colour="USD Reserves of Central Bank of Turkey"), col ="blue") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + xlab("Time") + ylab("USD-TRY Rate vs USD Reserves of CBRT")
+ggplot(dataset,aes(x = dates)) +  geom_line(aes(y = exchangerate * 3.8, colour="USD-TRY Rate"), col = "red") + geom_line(aes(y = cbreserves / 5000, colour="USD Reserves of Central Bank of Turkey"), col ="blue") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) + xlab("Time") + ylab("USD-TRY Rate vs USD Reserves of CBRT")
 
 
-ggplot(dataset,aes(x = dates.week)) +  geom_line(aes(y = interestrate, colour="Interest Rate on TRY Accounts"), col ="green") + geom_line(aes(y = cbreserves / 5000, colour="USD Reserves of Central Bank of Turkey"), col ="blue") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) +  xlab("Time") + ylab("USD Reserves of CBRT vs Interest Rate on TRY Accounts")
+ggplot(dataset,aes(x = dates)) +  geom_line(aes(y = interestrate, colour="Interest Rate on TRY Accounts"), col ="green") + geom_line(aes(y = cbreserves / 5000, colour="USD Reserves of Central Bank of Turkey"), col ="blue") + scale_x_date(date_labels = "%b-%Y", breaks = "6 months")  +  theme(text = element_text(size=10), axis.text.x = element_text(angle=90, hjust=1)) +  xlab("Time") + ylab("USD Reserves of CBRT vs Interest Rate on TRY Accounts")
 
 
 
 ```
+
+
+
+
+
 Exchange Rates and Interest Rates: At first glance, there seems to be a high positive correlation except after August 2019, which we've discussed above. Notice how the peak points of interest rate follow peak points of exchange rates with a small latency-meaning there probably is a cross correlation with lag. This is accurate thinking the nature of interest rates: it is a complex decision in comparison to selling reserves instantly. And when the exchange rate starts to fall, it is again a tougher decision to decrease interest rates, in comparison to the action of replenishing reserves. 
 
 
@@ -363,12 +439,15 @@ In the previous sections we've found that in general, the instant response would
 #### Correlation Tests
 After visual correlation analyses, we now conduct some mathematical correlation tests(by Pearson method). Our null hypothesis is that the 2 measures have 0 correlation.
 ```{r}
-
-
 cor.test(exchangerate,interestrate)
 ggplot(dataset, aes(exchangerate, interestrate)) + geom_point(alpha=0.75) + geom_smooth(method = "lm") + stat_cor(label.x.npc = "left", label.y.npc = "top") + xlab("USD-TRY Rate") + ylab("Interest Rate on TRY Accounts")
 
 ```
+
+
+
+
+
 A correlation coefficient of 0.88 indicates, as stated, a good positive correlation between two coefficients, with a really small p value. So we may reject the null hypothesis that correlation is 0 witj %95 confidence. Notice how the year 2019 have a really varied data(in which exchange rate was around 6) which deviate greatly from the regression line, resulting from the drastic interest rate lowering policy, which can be argued to have contributed to unstable exchange rates during that period, perhaps lowering the result of correlation test.
 
 
@@ -381,6 +460,11 @@ A correlation coefficient of 0.88 indicates, as stated, a good positive correlat
 cor.test(exchangerate,cbreserves)
 ggplot(dataset, aes(exchangerate, cbreserves)) + geom_point(alpha=0.75) + geom_smooth(method = "lm") + stat_cor(label.x.npc = "left", label.y.npc = "bottom") + xlab("USD-TRY Rate") + ylab("USD Reserves of CBRT")
 ```
+
+
+
+
+
 The correlation between reserves and the exchange rate is even stronger than the correlation between interest and exchange rates, indicating a sound basis for the argument that selling reserves has been a more frequent (not stronger!) policy during times of rising exchange rates. P value is again really small, and we reject the null hypothesis with %95 confidence.
 
 
@@ -390,6 +474,11 @@ The correlation between reserves and the exchange rate is even stronger than the
 cor.test(cbreserves,interestrate)
 ggplot(dataset, aes(cbreserves, interestrate)) + geom_point(alpha=0.75) + geom_smooth(method = "lm") + stat_cor(label.x.npc = "left", label.y.npc = "bottom") + xlab("USD Reserves of CBRT") + ylab("Interest Rate on TRY Accounts")
 ```
+
+
+
+
+
 A correlation coefficient of -0.88 indicated a good negative correlation between two measures, as we've expected. Notice how the scatterness of data points in the left side of the graph indicate the great fall of interest rates after August 2019(during which reserves were very low), which was an unexpected move by the central bank.
 
 
@@ -433,6 +522,11 @@ corr <- cor(dataset[,3:5])
 ggcorrplot(corr, lab = TRUE)
 
 ```
+
+
+
+
+
 #### Conclusion
 1-For all years, each of our measures are approximately normally distributed, with the exception of year 2018, which was a year of great fluctuations and uncertainties. The means seem to be moving in correlation; with a general trend of exchange rates' and interest rates' means rising and reserves' means falling. Variances seem stable, again with the year of 2018. 
 
@@ -447,7 +541,14 @@ ggcorrplot(corr, lab = TRUE)
 
 
 
-Here[]() you may reach the rmd file of my work.
-Here[]() is the dataset for exchange rates between periods January 2013-January 2020.
-Here[]() is the dataset for interest rates on TRY accounts between periods January 2013-January 2020.
-Here[]() is the dataset for USD reserves of CBRT between periods January 2013-January 2020.
+
+[Here](IE360-HW2.Rmd) you may reach the rmd file of my work.
+
+
+[Here](rates.csv) is the dataset for exchange rates between periods January 2013-January 2020.
+
+
+[Here](interest.csv) is the dataset for interest rates on TRY accounts between periods January 2013-January 2020.
+
+
+[Here](cbreserve.csv) is the dataset for USD reserves of CBRT between periods January 2013-January 2020.
