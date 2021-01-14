@@ -460,3 +460,7 @@ At first, we analyzed our data and found out that in months December, a peak in 
 
 Our complete model includes 2 variables marking specific times, and 3 independent variables that represent building issues permitted, costs related to housing and total number of second hand houses sold. One can argue that the model could be much more efficient, or elegant, so to say. Nevertheless, the current model seems reasonably accurate.
 
+
+[Here](hw3.Rmd) you may reach the rmd file of my work.
+
+

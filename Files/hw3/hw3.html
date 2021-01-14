@@ -450,7 +450,7 @@ summary {
 ## 4: 41233    1.80 49352 54148 1.319595e-10 3.923491e-10 10.56 9.06
 ## 5: 46049    1.82 55159 57212 1.284987e-10 3.773702e-10 10.18 8.77
 ## 6: 43345    1.89 53608 53079 1.254881e-10 3.649822e-10 11.62 8.30</code></pre>
-<p>Above you may see 2 data frames: 1 for monthly sales data, and 1 for values of potential predictors in corresponding months. The coloumn names for potential predictors stand for:</p>
+<p>Above you may see the head() portion of 2 data frames: 1 for monthly sales data, and 1 for values of potential predictors in corresponding months. The coloumn names for potential predictors stand for:</p>
 <p>1-Dollar-Try Exchange Rate (USD-TRY): When exchange rates go up, people may tend to think that house prices will also go up, therefore they may accelerate their plans to buy a house. Or, if they have cash, they may choose to invest it in foreign currencies rather than buying a house. Whatever the effect, exchange rates is a good potential predictor.</p>
 <p>2-Building Permits Issued(BPI): When buildings are constructed, the firm applies for a building permit in order to legally sell the residential properties to citizens.</p>
 <p>3-Second Hand Houses Sold(SHHS): Most of the time, people sell their own houses to finance their new house.</p>
@@ -475,6 +475,7 @@ summary {
 </div>
 <div id="constructing-a-regression-model" class="section level4">
 <h4>Constructing a Regression Model</h4>
+<p>Note: In all models, only the tail() portion of the data frame will be exhibited.</p>
 <div id="model-1" class="section level5">
 <h5>Model 1</h5>
 <p>We start building our model by first taking into account some measures related to time: Namely, as we discussed above, we define integer variables to mark Decembers, 2019(crisis year) and 2020(COVID-19 year). We add this variables to our data frame and into our model.</p>
@@ -828,6 +829,7 @@ summary {
 <h4>Conclusion</h4>
 <p>At first, we analyzed our data and found out that in months December, a peak in sales is observed. This is due to evading the tax payments on November. Moreover, we’ve found out that the political, economic and social instability of years 2019 and 2020 also affected the sales, causing them to have a high variance. Therefore, marking Decembers and these 2 years have been our main action when building our model. Also, interestingly, we’ve observed that the interest rates and exchange rates do not have much affect on sales; this was probably due to their correlation with them in various lags: these measures do not affect sales instantly, rather in a delayed fashion.</p>
 <p>Our complete model includes 2 variables marking specific times, and 3 independent variables that represent building issues permitted, costs related to housing and total number of second hand houses sold. One can argue that the model could be much more efficient, or elegant, so to say. Nevertheless, the current model seems reasonably accurate.</p>
+<p><a href="hw3.Rmd">Here</a> you may reach the rmd file of my work.</p>
 </div>
 
 
