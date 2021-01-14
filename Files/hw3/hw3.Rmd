@@ -1,0 +1,462 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(warning = FALSE)
+knitr::opts_chunk$set(message = FALSE)
+
+```
+
+
+
+
+---
+title: "HW3"
+output: html_document
+---
+
+
+
+Housing is one of the most important necessity of human beings. Probably a majority of people sell or buy a residential property at least once in a lifetime. Therefore, it is obvious that the housing market is vast and its impact on the economy is substantial. Many people buy houses for accommodation; however, buying a residential property is also seen by many as an investment instrument.
+
+
+Of course, it goes without saying that such a market is affected by many factors. For instance, when interest rates go down, more people tend to apply for a mortgage since it would be easier for them to finance the interest later. Also, when the general wealth of the public goes up, more house sales can be observed.
+
+
+The main aim of this study is to develop a regression model of the monthly number of residential properties(first hand) sold in Turkey. Since residential property market has a great impact on GDP, it is crucial to develop a good and accurate model so that many agents in the market can make plans accordingly and supply and demand can stay in equilibrium constantly.
+
+
+In the first section, the general trend in first-hand residential property sales will be analyzed. In the second section, potential predictors will be evaluated in terms of their correlations with each other, so that only independent variables would be used in the model. In the 3rd section some potential models will be presented, and the best model will be chosen through an iterative process. In the 4th section, residual analysis will be made and the forecast for January 2021 will be made. In the 5th and last section, general findings will be narrated.
+
+All data are taken from the website EVDS of CBRT. The data are monthly, and the time interval of interest is January 2013-December 2020. At the end of the study, I will try to predict the number of sales for January 2021.
+
+
+Note: In this study, the words "house" and "residential property" are used interchangeably, they mean the same thing.
+
+Note2: Modeling of house sales is a complex study that has many influencing factors. Most of the time, the relationship between dependent variable and the independent variables may have some cross correlation with some lag (drop of interest rates in some particular month may have an impact on house sales in the following months etc.). Cross correlations with lag are excluded from this study.
+
+
+
+#### Data Manipulation
+```{r}
+library(dplyr)
+library(tidyverse)
+library(ggplot2)
+library(lubridate)
+library(data.table)
+library(zoo)
+library(tseries)
+library(ggjoy)
+library(wesanderson)
+library(forecast)
+library(ggcorrplot)
+
+
+
+setwd("/Users/metedibi/Desktop/Dersler/IE360/hw3")
+
+housedata<-read.csv(file = "houses.csv", header = TRUE)
+housedata<-housedata %>% mutate(
+  Date=ym(Date)
+)
+
+
+
+
+
+sales<-as.numeric(housedata$Sold)
+
+dates<-housedata$Date
+
+months<-months(dates)
+
+years<-year(dates)
+
+interestrates<-as.numeric(read.csv(file="interest.csv", header = TRUE)$Rate)
+
+hpi<-as.numeric(read.csv(file="hpi.csv", header = TRUE)$Rate)
+hpi<-append(hpi,mean(hpi[(length(hpi)-11):length(hpi)])) #Since some data lack values for December, or even for November in some cases, I applied an average method to fill these lacking values.
+hpi<-append(hpi,mean(hpi[(length(hpi)-11):length(hpi)]))
+
+newlyconstructed<-as.numeric(read.csv(file="construction.csv", header = TRUE)$Amount) #last 3 months data missing
+newlyconstructed<-append(newlyconstructed,mean(newlyconstructed[(length(newlyconstructed)-11):length(newlyconstructed)]))
+newlyconstructed<-append(newlyconstructed,mean(newlyconstructed[(length(newlyconstructed)-11):length(newlyconstructed)]))
+newlyconstructed<-append(newlyconstructed,mean(newlyconstructed[(length(newlyconstructed)-11):length(newlyconstructed)]))
+
+
+costs<-as.numeric(read.csv(file="costs.csv", header = TRUE)$B)
+gdp<-as.numeric(read.csv(file="gsyih.csv", header = TRUE)$Amount) #1000
+gdp<-gdp * 1000
+gdp.trend<-c()
+
+j = 1
+i = 1
+repeat{
+k = 0
+repeat{
+gdp.trend[i]<-gdp[j] + (gdp[j + 1] - gdp[j]) * k / 3
+i = i + 1
+k = k + 1
+if(k == 3) break
+}
+j = j + 1
+if(j == length(gdp)) break
+}
+
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+gdp.trend<-append(gdp.trend, mean(gdp.trend[(length(gdp.trend)-11):length(gdp.trend)]))
+
+
+secondhand<-as.numeric(read.csv(file="2ndhand.csv", header = TRUE)$Amount)
+secondhand<-append(secondhand, mean(secondhand[(length(secondhand)-11):length(secondhand)]))
+
+probtobuyhouse<-as.numeric(read.csv(file="survey.csv", header = TRUE)$Rate)
+exchangerate<-as.numeric(read.csv(file="exchangerate.csv", header = TRUE)$Rate)
+
+
+
+
+prices.adjusted<-hpi/gdp.trend
+costs.adjusted<-costs / gdp.trend
+
+
+
+sales.data<-data.table(dates,months,years,sales)
+potential.predictors<-data.table(sales,exchangerate,newlyconstructed,secondhand,prices.adjusted,costs.adjusted,probtobuyhouse,interestrates)
+
+colnames(sales.data)<-c("Dates", "Months", "Years", "Sales")
+
+colnames(potential.predictors)<-c("Sales", "USD-TRY", "BPI", "SHHS", "A.HP", "A.HC", "PBH", "IR")
+
+head(sales.data)
+head(potential.predictors)
+```
+
+
+
+Above you may see the head() portion of 2 data frames: 1 for monthly sales data, and 1 for values of potential predictors in corresponding months. The coloumn names for potential predictors stand for:
+
+1-Dollar-Try Exchange Rate (USD-TRY): When exchange rates go up, people may tend to think that house prices will also go up, therefore they may accelerate their plans to buy a house. Or, if they have cash, they may choose to invest it in foreign currencies rather than buying a house. Whatever the effect, exchange rates is a good potential predictor.
+
+2-Building Permits Issued(BPI): When buildings are constructed, the firm applies for a building permit in order to legally sell the residential properties to citizens.
+
+3-Second Hand Houses Sold(SHHS): Most of the time, people sell their own houses to finance their new house. 
+
+4-Adjusted House Prices(A.HP): During data manipulation stage, I took quarterly GDP data and spread it in a monthly fashion. When new house price index values are divided by monthly GDP (in TRY), it may be a good indicator of the expensiveness of the property in that particular month; since GDP is an indicator of nationwide wealth.
+
+5-Adjusted House Costs (A.HC): Again, general costs related to houses calculated by Costs/GDP.
+
+6-Survey Answer-Probability to Buy a House(PBH): This measure indicates the percentage probability of survey participants to buy a residential property in the upcoming 12 months.
+
+7-The Interest Rate on Credits(IR): When interest rates for mortgages go down, more people tend to apply for a credit and buy houses.
+
+
+
+
+
+
+#### Analysis of Sales Data 
+```{r}
+ggplot(sales.data,aes(x = sales, y = as.character(years), fill = as.character(years))) + geom_joy(aes(alpha = 1), scale=3, rel_min_height=0.01) + theme_joy() + scale_fill_manual(values = c(wes_palette("Rushmore1", n= 4), wes_palette("Royal1", n= 4))) +  ylab("Years") + xlab("1st Hand House Sales")
+
+ggplot(sales.data, aes(x = dates,y = sales, color = sales)) + geom_line(col = "dark red") + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=8), axis.text.x = element_text(angle=90, hjust=1)) + xlab("Time") + ylab("1st Hand House Sales")
+
+```
+
+
+
+
+Sales data seem to be somehow normally distributed until year 2019; which was a year of great economic fluctuations and its variance is large. Year 2020 also seem to be distorting the normal distributed data and it has a high variance, probably because of COVID-19 pandemic. The mean seems to be only slightly increasing until 2019, then it goes down in the following years.
+
+
+When we analyze the line plot, an interesting finding is the repeated pattern in December: Probably because of the annual tax payments in November, people tend to buy houses just after November to evade the tax-so the biggest rise is observed in December. Also the high variance of years 2019 and 2020 can be observed by severe rises and falls.
+
+
+One might argue that transforming sales data by taking the natural logarithm might be a good idea. However, the increase in variances do not seem incredibly obvious so that taking logarithm might be ineffective; moreover, I have tested the model with a log transformation, and unfortunately a significant improvement was not observed.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### Correlation Between Predictors and Sales Data
+```{r}
+correlations <- cor(potential.predictors)
+ggcorrplot(correlations, hc.order = TRUE, 
+                              outline.col = "black", 
+                              show.legend = FALSE, 
+                              type = "full", 
+                              lab = TRUE, 
+                              lab_size = 3.5,
+                              title = "Correlation Matrix", 
+                              colors = c("blue","white","red"),
+                              legend.title = "Correlation") +
+  theme(legend.position="none",plot.title=element_text(hjust=0.5), 
+        axis.text.x = element_text(angle = 90, vjust =0.5, hjust=0.5))  
+
+#correlation matrix düzgünce göster
+
+```
+
+
+
+
+Surprisingly, we do not see interest rates and exchange rates as strong predictors for house sales. Why is that? Perhaps there exists some cross correlation; maybe interest rates and exchange rates influence house sales in the following months.. we do not know. According to the correlation matrix; building permits issued, second hand house sales and adjusted housing costs seem to be the most influential measures on 1st hand house sales; and they seem to be independent from each other, so they are a good fit to our model.
+
+
+
+
+
+We now proceed with building our model. Note that in every model, intercepts will be excluded; since some relationships between independent variables and the dependent variable can be absorbed by the intercept in most of the cases. However, when the intercept is omitted, adjusted r squared values may be misleading. Thus, throughout our iterations, we will analyze:
+
+-p values
+-Residential Standard Errors
+-Breusch-Godfrey test results for independence of residuals
+-Auto-correlation between residuals
+-Goodness of fit of residuals to normal distribution.
+
+
+#### Constructing a Regression Model
+
+Note: In all models, only the tail() portion of the data frame will be exhibited.
+
+##### Model 1
+We start building our model by first taking into account some measures related to time: Namely, as we discussed above, we define integer variables to mark Decembers, 2019(crisis year) and 2020(COVID-19 year). We add this variables to our data frame and into our model.
+```{r}
+sales.data[months=="December",is_december:=1]
+sales.data[is.na(is_december)==T,is_december:=0]
+
+sales.data[years=="2019",is_crisis_year:=1]
+sales.data[years=="2020",is_covid_year:=1]
+sales.data[is.na(is_crisis_year)==T,is_crisis_year:=0]
+sales.data[is.na(is_covid_year)==T,is_covid_year:=0]
+
+
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december),data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+
+Our initial model surely needs some development, since the Breusch-Godfrey test rejects the null hypothesis that there is no correlation between residuals. The residuals seem to have a strong correlation with lag 1, so perhaps we may tackle the problem by adding a lagged variable of sales with lag 1.
+
+
+
+
+##### Model 2
+We add the lagged variable to our data frame and into our model.
+```{r}
+sales.data[, "lag.1" := shift(sales, n = 1, type = "lag")]
+sales.data[is.na("lag.1"), "lag.1":="Sales"]
+
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+lag.1,data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+
+Our Residual standard error have decreased slightly; but more importatly, the auto-correlation of lag 1 between residuals seem to have decreased. Also, the Breusch-Godfrey test now returns a higher p value, meaning we are doing things right.
+
+
+
+
+
+
+
+##### Model 3
+Next, we begin adding our measures as independent variables. We start by adding "Adjusted Housing Costs".
+```{r}
+sales.data[,"A.HC":=costs.adjusted]
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+lag.1+A.HC,data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+
+We had a nice fall in residual standard error, Breusch-Godfrey test returned a higher p value, so this iteration was helpful. However, notice how the effect of lag 1 has decreased. This was probably because cost data also bears and autocorrelation with lag 1, so our lag variable lost its independence. Perhaps it is time to omit this variable from the model. We will probably see a higher autocorrelation between residuals after this action; but we will have variables that are completely independent from each other. One might argue over which value is more important, but I choose to have variables with independence over less autocorrelation of residuals. We can tackle the autocorrelation problem later by various strategies if it continues to exist.
+
+
+
+
+
+
+##### Model 4
+We omit the lag variable from our model.
+```{r}
+sales.data<-select(sales.data, -"lag.1")
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+A.HC,data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+
+As we have predicted, the model became slightly worse in terms of autocorrelation between residuals. We also observe a very slight amount of increase in residual standard error.
+
+
+
+
+
+##### Model 5
+Next, we add the measure, "Second Hand Houses Sold" to our model.
+```{r}
+sales.data[,"SHHS":=secondhand]
+
+
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+A.HC+SHHS,data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+We had an incredible increase in our model: Breusch-Godfrey test now accepts the null hypothesis that residuals are independent, there seem to be no correlation between them. But most importantly, our residual standard error is reduced by half. 
+
+
+
+
+##### Model 6
+Next, we add our measure, "Number of Building Permits Issued"
+```{r}
+
+sales.data[,"BPI":=newlyconstructed]
+
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+A.HC+SHHS+BPI,data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+We had a nice fall in residual standard error, and Breusch-Godfrey now returns even a higher value then before. Our model seems nearly completed. Within each iteration, our residuals resemble the normal distribution more and more. 
+
+At this point, we should analyze and compare plots for original data and our fitted values, and see which improvements can be made. When whe check the graph, we see that all but 2 of the severe peaks are predicted by our model. These peaks correspond to specific months: September 2017 and October 2018. In those months, something particularly different occured, something that can not be explained by our model. Maybe something related to exchange rates? When we make a quick research, we may see that these specific 2 months correspond to dates in which the currency rate skyrocketed. In such crisis times, the system of any macro-variable may malfunction and behave strangely. In the next and last iteration, we deal with this issue and complete our model.
+
+
+
+##### Model 7
+We define an integer variable for 2 specific months: September 2017 and October 2018. We add this variable to our dataframe and our model.
+```{r}
+sales.data[dates=="2017-09-01",is_crisis_date:=1]
+sales.data[dates=="2018-10-01",is_crisis_date:=1]
+sales.data[is.na(is_crisis_date)==T,is_crisis_date:=0]
+
+tail(sales.data)
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+A.HC+SHHS+BPI+as.factor(is_crisis_date),data = sales.data)
+summary(model)
+checkresiduals(model)
+plot(sales, type = 'l')
+points(model$fitted, type = 'l', col = 2)
+```
+
+
+
+Now when we check our plot graph, we see that these 2 peaks which were not predicted correctly are now covered by our model, due to our recently introduced integer variable. The line plots now seem to almost completely overlap. Our residual standard error has dropped nearly %20, all our variables still seem perfectly independent, and Breusch-Godfrey still returns a very large p value. The residuals are nearly perfectly independent and distributed normally. Our model is complete.
+
+
+
+
+
+#### Model Analysis
+Now that we've completed our model, we proceed by analyzing our fitted values vs actual values and our fitted values versus residuals.
+```{r}
+fit.data<-data.frame(dates,months,years,sales,model$fitted.values,model$residuals)
+ggplot(fit.data, aes(x = model$fitted.values, y = sales)) + geom_point() + geom_abline()
+ggplot(fit.data, aes(x = model$fitted.values, y = model$residuals)) + geom_point()
+
+
+
+```
+
+
+
+
+Our fitted values seem to have a nice, linear relationship with the actual data with a slope of 1. Moreover, as we've discussed, the residuals seem almost perfectly scattered for every fitted value.
+
+
+
+
+
+
+
+
+
+#### Forecast for January 2021
+Since we do not have January data for our predictors, we should use the same method we used in data manipulation stage: We take the yearly average of the predictor's values as our forecast for the predictor's next month value:
+```{r}
+newdate<-as.Date("2021-01-01")
+new.ahc<-mean(costs.adjusted[(length(costs.adjusted)-11):length(costs.adjusted)])
+new.shhs<-mean(secondhand[(length(secondhand)-11):length(secondhand)])
+new.bpi<-mean(newlyconstructed[(length(newlyconstructed)-11):length(newlyconstructed)])
+newrow<-data.table(newdate, months(newdate), year(newdate),NA, 0, 0, 1, new.ahc, new.shhs, new.bpi, 0)
+colnames(newrow)<-colnames(sales.data)
+date_info=as.Date("2021-01-01")
+
+
+model<-lm(sales~-1+as.factor(is_crisis_year)+as.factor(is_covid_year)+as.factor(is_december)+A.HC+SHHS+BPI+as.factor(is_crisis_date),data = sales.data)
+
+
+
+new.df <- data.frame(is_crisis_year = 0, is_covid_year = 1, is_december = 0, A.HC = new.ahc, SHHS = new.shhs, BPI = new.bpi, is_crisis_date = 0)
+
+
+cat("Prediction for January 2021: ", predict(model,new.df))
+
+```
+
+
+
+
+
+
+
+
+
+#### Conclusion
+At first, we analyzed our data and found out that in months December, a peak in sales is observed. This is due to evading the tax payments on November. Moreover, we've found out that the political, economic and social instability of years 2019 and 2020 also affected the sales, causing them to have a high variance. Therefore, marking Decembers and these 2 years have been our main action when building our model. Also, interestingly, we've observed that the interest rates and exchange rates do not have much affect on sales; this was probably due to their correlation with them in various lags: these measures do not affect sales instantly, rather in a delayed fashion.
+
+Our complete model includes 2 variables marking specific times, and 3 independent variables that represent building issues permitted, costs related to housing and total number of second hand houses sold. One can argue that the model could be much more efficient, or elegant, so to say. Nevertheless, the current model seems reasonably accurate.
+
