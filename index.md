@@ -8,3 +8,6 @@
 
 
 [Here](Files/hw2/IE360-HW2.html)  is the link to Homework 2.
+
+
+[Here](Files/hw3/hw3.html)  is the link to Homework 3.
