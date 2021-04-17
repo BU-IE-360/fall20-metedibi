@@ -31,7 +31,6 @@ library(urca)
 library(gratia)
 library(mgcv)
 
-
 setwd("/Users/metedibi/Desktop/Dersler/IE360/hw4")
 data<-read.csv(file = "project.csv", header = TRUE) 
 data$Date<-as.Date(data$Date, format = "%Y-%m-%d")
@@ -290,6 +289,8 @@ head(new.data)
 Now that we have inverse transformed our data, we will take a look at residuals.
 ```{r}
 ggplot(new.data, aes(x = dates, y = residuals)) + geom_line(col = "dark red", alpha = 0.8) + scale_x_date(date_labels = "%b-%Y", breaks = "3 months")  +  theme(text = element_text(size=8), axis.text.x = element_text(angle=90, hjust=1)) + xlab("Time") + ylab("Residuals")
+
+checkresiduals(model1)
 ```
 
 
